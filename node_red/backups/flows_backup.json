@@ -1,0 +1,367 @@
+[
+  {
+    "id": "flow_128e3ffe",
+    "type": "tab",
+    "label": "Temperature Measurements API",
+    "disabled": false,
+    "info": "API endpoint for querying temperature measurements"
+  },
+  {
+    "id": "flow_128e3ffe_db_config",
+    "type": "sqlitedb",
+    "z": "",
+    "name": "measurements_db",
+    "db": "C:\\Users\\erpes\\Desktop\\red_node_pimp\\db\\measurements.db",
+    "mode": "RWC"
+  },
+  {
+    "id": "flow_128e3ffe_http_in",
+    "type": "http in",
+    "z": "flow_128e3ffe",
+    "name": "Temperature Query Endpoint",
+    "url": "/query/temperature",
+    "method": "get",
+    "upload": false,
+    "swaggerDoc": "",
+    "x": 120,
+    "y": 100,
+    "wires": [
+      [
+        "flow_128e3ffe_validate",
+        "flow_128e3ffe_debug1"
+      ]
+    ]
+  },
+  {
+    "id": "flow_128e3ffe_debug1",
+    "type": "debug",
+    "z": "flow_128e3ffe",
+    "name": "Debug Input",
+    "active": true,
+    "tosidebar": true,
+    "console": true,
+    "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 120,
+    "y": 160,
+    "wires": []
+  },
+  {
+    "id": "flow_128e3ffe_validate",
+    "type": "function",
+    "z": "flow_128e3ffe",
+    "name": "Validate Date",
+    "func": "\n                if (!msg.req.query.date) {\n                    msg.statusCode = 400;\n                    msg.payload = {\n                        error: \"Date parameter is required\",\n                        status: \"invalid_request\",\n                        code: 400\n                    };\n                    return [null, msg];\n                }\n\n                const dateRegex = /^\\d{4}-\\d{2}-\\d{2}$/;\n                if (!dateRegex.test(msg.req.query.date)) {\n                    msg.statusCode = 400;\n                    msg.payload = {\n                        error: \"Invalid date format. Please use YYYY-MM-DD\",\n                        status: \"invalid_format\",\n                        code: 400\n                    };\n                    return [null, msg];\n                }\n\n                msg.params = {\n                    $date: msg.req.query.date\n                };\n                return [msg, null];\n                ",
+    "outputs": 2,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 320,
+    "y": 100,
+    "wires": [
+      [
+        "flow_128e3ffe_sqlite",
+        "flow_128e3ffe_debug2"
+      ],
+      [
+        "flow_128e3ffe_http_out"
+      ]
+    ]
+  },
+  {
+    "id": "flow_128e3ffe_debug2",
+    "type": "debug",
+    "z": "flow_128e3ffe",
+    "name": "Debug Before SQL",
+    "active": true,
+    "tosidebar": true,
+    "console": true,
+    "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 320,
+    "y": 160,
+    "wires": []
+  },
+  {
+    "id": "flow_128e3ffe_sqlite",
+    "type": "sqlite",
+    "z": "flow_128e3ffe",
+    "name": "Query Measurements",
+    "mydb": "flow_128e3ffe_db_config",
+    "sqlquery": "prepared",
+    "sql": "SELECT * FROM measurements WHERE date = $date",
+    "params": [],
+    "x": 520,
+    "y": 100,
+    "wires": [
+      [
+        "flow_128e3ffe_format",
+        "flow_128e3ffe_debug3"
+      ]
+    ]
+  },
+  {
+    "id": "flow_128e3ffe_debug3",
+    "type": "debug",
+    "z": "flow_128e3ffe",
+    "name": "Debug After SQL",
+    "active": true,
+    "tosidebar": true,
+    "console": true,
+    "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 520,
+    "y": 160,
+    "wires": []
+  },
+  {
+    "id": "flow_128e3ffe_format",
+    "type": "function",
+    "z": "flow_128e3ffe",
+    "name": "Format Response",
+    "func": "\n                if (!msg.payload || msg.payload.length === 0) {\n                    msg.statusCode = 404;\n                    msg.payload = {\n                        error: `No measurement found for date ${msg.params.$date}`,\n                        status: \"not_found\",\n                        code: 404\n                    };\n                    return msg;\n                }\n\n                const measurement = msg.payload[0];\n                msg.payload = {\n                    date: measurement.date,\n                    temperature: measurement.temperature,\n                    humidity: measurement.humidity,\n                    metadata: {\n                        measurement_type: \"environmental\",\n                        temperature_unit: \"celsius\",\n                        humidity_unit: \"percentage\",\n                        data_source: \"local_sqlite_db\",\n                        measurement_location: \"office_environment\",\n                        accuracy: \"high\",\n                        calibration_date: \"2024-01-01\"\n                    },\n                    query_timestamp: new Date().toISOString()\n                };\n                return msg;\n                ",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 720,
+    "y": 100,
+    "wires": [
+      [
+        "flow_128e3ffe_http_out"
+      ]
+    ]
+  },
+  {
+    "id": "flow_128e3ffe_http_out",
+    "type": "http response",
+    "z": "flow_128e3ffe",
+    "name": "Send Response",
+    "statusCode": "",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "x": 920,
+    "y": 100,
+    "wires": []
+  },
+  {
+    "id": "flow_704ad316",
+    "type": "tab",
+    "label": "Chuck Norris Jokes API",
+    "disabled": false,
+    "info": "API endpoint for fetching Chuck Norris jokes with French translation"
+  },
+  {
+    "id": "flow_704ad316_http_in",
+    "type": "http in",
+    "z": "flow_704ad316",
+    "name": "Jokes Endpoint",
+    "url": "/joke",
+    "method": "get",
+    "upload": false,
+    "swaggerDoc": "",
+    "x": 120,
+    "y": 100,
+    "wires": [
+      [
+        "flow_704ad316_fetch"
+      ]
+    ]
+  },
+  {
+    "id": "flow_704ad316_fetch",
+    "type": "function",
+    "z": "flow_704ad316",
+    "name": "Fetch Random Joke",
+    "func": "\n                // API endpoint for Chuck Norris jokes\n                msg.url = 'https://api.chucknorris.io/jokes/random';\n                return msg;\n                ",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 320,
+    "y": 100,
+    "wires": [
+      [
+        "flow_704ad316_translate"
+      ]
+    ]
+  },
+  {
+    "id": "flow_704ad316_translate",
+    "type": "http request",
+    "z": "flow_704ad316",
+    "name": "Get Joke",
+    "method": "GET",
+    "ret": "obj",
+    "paytoqs": "ignore",
+    "url": "",
+    "tls": "",
+    "persist": false,
+    "proxy": "",
+    "insecureHTTPParser": false,
+    "x": 520,
+    "y": 100,
+    "wires": [
+      [
+        "flow_704ad316_format"
+      ]
+    ]
+  },
+  {
+    "id": "flow_704ad316_format",
+    "type": "function",
+    "z": "flow_704ad316",
+    "name": "Format Response",
+    "func": "\n                if (!msg.payload || !msg.payload.value) {\n                    msg.statusCode = 500;\n                    msg.payload = {\n                        error: \"Failed to fetch joke\",\n                        status: \"error\",\n                        code: 500\n                    };\n                    return msg;\n                }\n\n                msg.payload = {\n                    response: msg.payload.value,\n                    metadata: {\n                        source: \"api.chucknorris.io\",\n                        type: \"chuck_norris_joke\",\n                        language: \"english\",\n                        timestamp: new Date().toISOString()\n                    }\n                };\n                return msg;\n                ",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 720,
+    "y": 100,
+    "wires": [
+      [
+        "flow_704ad316_http_out"
+      ]
+    ]
+  },
+  {
+    "id": "flow_704ad316_http_out",
+    "type": "http response",
+    "z": "flow_704ad316",
+    "name": "Send Response",
+    "statusCode": "",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "x": 920,
+    "y": 100,
+    "wires": []
+  },
+  {
+    "id": "flow_c20fba92",
+    "type": "tab",
+    "label": "Temperature List API",
+    "disabled": false,
+    "info": "API endpoint for listing all available temperature measurements"
+  },
+  {
+    "id": "flow_c20fba92_db_config",
+    "type": "sqlitedb",
+    "z": "",
+    "name": "measurements_db",
+    "db": "C:\\Users\\erpes\\Desktop\\red_node_pimp\\db\\measurements.db",
+    "mode": "RWC"
+  },
+  {
+    "id": "flow_c20fba92_http_in",
+    "type": "http in",
+    "z": "flow_c20fba92",
+    "name": "Temperature List Endpoint",
+    "url": "/list/temperatures",
+    "method": "get",
+    "upload": false,
+    "swaggerDoc": "",
+    "x": 120,
+    "y": 100,
+    "wires": [
+      [
+        "flow_c20fba92_sqlite",
+        "flow_c20fba92_debug1"
+      ]
+    ]
+  },
+  {
+    "id": "flow_c20fba92_debug1",
+    "type": "debug",
+    "z": "flow_c20fba92",
+    "name": "Debug Before SQL",
+    "active": true,
+    "tosidebar": true,
+    "console": true,
+    "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 120,
+    "y": 160,
+    "wires": []
+  },
+  {
+    "id": "flow_c20fba92_sqlite",
+    "type": "sqlite",
+    "z": "flow_c20fba92",
+    "name": "List Measurements",
+    "mydb": "flow_c20fba92_db_config",
+    "sqlquery": "fixed",
+    "sql": "SELECT date, temperature, humidity FROM measurements ORDER BY date DESC",
+    "params": [],
+    "x": 320,
+    "y": 100,
+    "wires": [
+      [
+        "flow_c20fba92_format",
+        "flow_c20fba92_debug2"
+      ]
+    ]
+  },
+  {
+    "id": "flow_c20fba92_debug2",
+    "type": "debug",
+    "z": "flow_c20fba92",
+    "name": "Debug After SQL",
+    "active": true,
+    "tosidebar": true,
+    "console": true,
+    "complete": "true",
+    "targetType": "full",
+    "statusVal": "",
+    "statusType": "auto",
+    "x": 320,
+    "y": 160,
+    "wires": []
+  },
+  {
+    "id": "flow_c20fba92_format",
+    "type": "function",
+    "z": "flow_c20fba92",
+    "name": "Format Response",
+    "func": "\n                if (!msg.payload || msg.payload.length === 0) {\n                    msg.statusCode = 404;\n                    msg.payload = {\n                        error: \"No measurements found\",\n                        status: \"not_found\",\n                        code: 404\n                    };\n                    return msg;\n                }\n\n                msg.payload = {\n                    measurements: msg.payload.map(m => ({\n                        date: m.date,\n                        temperature: m.temperature,\n                        humidity: m.humidity\n                    })),\n                    metadata: {\n                        count: msg.payload.length,\n                        measurement_type: \"environmental\",\n                        temperature_unit: \"celsius\",\n                        humidity_unit: \"percentage\",\n                        data_source: \"local_sqlite_db\",\n                        measurement_location: \"office_environment\",\n                        accuracy: \"high\",\n                        calibration_date: \"2024-01-01\"\n                    },\n                    query_timestamp: new Date().toISOString()\n                };\n                return msg;\n                ",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 520,
+    "y": 100,
+    "wires": [
+      [
+        "flow_c20fba92_http_out"
+      ]
+    ]
+  },
+  {
+    "id": "flow_c20fba92_http_out",
+    "type": "http response",
+    "z": "flow_c20fba92",
+    "name": "Send Response",
+    "statusCode": "",
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "x": 720,
+    "y": 100,
+    "wires": []
+  }
+]

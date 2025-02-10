@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+python-dotenv>=1.0.0
+requests>=2.31.0
+pydantic
+pydantic-ai
+gradio
+python-multipart
+openai
