@@ -50,21 +50,28 @@ chat_agent = Agent(
 
 
 @chat_agent.tool
-async def use_tool(ctx: RunContext[ChatDependencies], tool: str, query: str) -> ChatResult:
-    """Use a specific tool with the given query."""
-    result = await ctx.deps.tools_manager.execute_tool(tool, query)
+async def use_tool(
+    ctx: RunContext[ChatDependencies],
+    tool_name: str,
+    query: str
+) -> ChatResult:
+    """Use a specific tool to handle the query.
     
-    # Fast path: si la réponse est directe, on la retourne sans reformatage
-    if isinstance(result, ChatResponse) and result.direct_response:
+    Args:
+        tool_name: Name of the tool to use
+        query: The query to pass to the tool
+        
+    Returns:
+        The tool's response
+    """
+    logger.info(f"Executing tool: {tool_name} with query: {query}")
+    try:
+        response = await ctx.deps.tools_manager.execute_tool(tool_name, query)
+        logger.info(f"Tool execution result: {response}")
+        return ChatResult(response=response, tool_used=tool_name)
+    except Exception as e:
+        logger.error(f"Error executing tool: {str(e)}")
         return ChatResult(
-            response=result.response,
-            tool_used=tool,
-            message_history=result.message_history
+            response=f"Error using tool {tool_name}: {str(e)}",
+            tool_used=None
         )
-    
-    # Sinon, on laisse l'agent formater la réponse
-    return ChatResult(
-        response=result,
-        tool_used=tool,
-        message_history=[]
-    )

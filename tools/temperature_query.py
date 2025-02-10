@@ -9,7 +9,6 @@ from .models import (
     TemperatureQuery,
     TemperatureResponse
 )
-from core.models import ChatResponse  # Import depuis core.models
 from .dependencies import NodeREDDependencies
 from .base_tool import BaseTool
 import logfire
@@ -168,7 +167,7 @@ class TemperatureQueryTool(BaseTool):
         
         return agent
     
-    async def execute(self, query: str) -> ChatResponse:
+    async def execute(self, query: str) -> str:
         """Execute the temperature query tool with the given query."""
         logger.info(f"Executing temperature query: {query}")
         try:
@@ -183,11 +182,7 @@ class TemperatureQueryTool(BaseTool):
                 )
                 
                 if data.success:
-                    return ChatResponse(
-                        response=data.formatted_response,
-                        message_history=[],
-                        direct_response=True  # Skip reformatting
-                    )
+                    return data.formatted_response
                 else:
                     raise ValueError(data.error or "Aucune donnée disponible")
             else:

@@ -41,10 +41,6 @@ class ChatResponse(BaseModel):
     """Model for chat responses."""
     response: str
     message_history: List[Dict[str, str]] = Field(
-        default_factory=list,
+        ...,
         description="Updated conversation history"
-    )
-    direct_response: bool = Field(
-        default=False,
-        description="If True, skip agent reformatting"
     )
