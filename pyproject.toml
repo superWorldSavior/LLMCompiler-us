@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "red-node-pimp"
+version = "0.1.0"
+description = "FastAPI application with Node-RED integration for temperature monitoring"
+authors = ["Your Name <your.email@example.com>"]
+packages = [
+    { include = "core" },
+    { include = "tools" }
+]
+
+[tool.poetry.dependencies]
+python = "3.10.*"
+fastapi = "*"
+uvicorn = "*"
+python-dotenv = "*"
+requests = "*"
+pydantic = "*"
+pydantic-ai = "*"
+gradio = "*"
+python-multipart = "*"
+openai = "*"
+logfire = "*"
+aiohttp = "*"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

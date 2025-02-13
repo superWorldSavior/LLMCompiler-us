@@ -75,26 +75,43 @@ The Node-RED integration is organized into reusable components:
 
 ### Prerequisites
 
-1. **Node-RED**
-   - Install Node-RED: `npm install -g node-red`
+1. **Install pyenv**
+   - Windows: Follow instructions at https://github.com/pyenv-win/pyenv-win#installation
+   - The project will automatically use Python 3.10 through pyenv
+
+2. **Install Poetry**
+   - Follow instructions at https://python-poetry.org/docs/#installation
+   
+3. **Install Node.js and npm**
+   - Download and install from https://nodejs.org/
+   - Install Node-RED globally: `npm install -g node-red`
    - Install SQLite node: `cd ~/.node-red && npm install node-red-node-sqlite`
 
-2. **Python Dependencies**
-   - Install requirements: `pip install -r requirements.txt`
+### Installation
+
+1. **Clone the project**
+   ```bash
+   git clone <repository-url>
+   cd red_node_pimp
+   ```
+
+2. **Install dependencies**
+   ```bash
+   # pyenv will automatically install and use Python 3.10
+   poetry install  # Install Python dependencies
+   cd node_red && npm install  # Install Node-RED dependencies
+   ```
 
 ### Starting the Application
 
-1. **Start Node-RED**
+1. **Start everything with one command**
    ```bash
-   node-red
+   ./start_app.ps1
    ```
-   Node-RED will be available at http://127.0.0.1:1880
-
-2. **Start the FastAPI Server**
-   ```bash
-   uvicorn main:app --reload
-   ```
-   The chat interface will be available at http://127.0.0.1:8000
+   This will:
+   - Start Node-RED (available at http://127.0.0.1:1880)
+   - Wait for Node-RED to initialize
+   - Start the FastAPI server with chat interface (available at http://127.0.0.1:8000)
 
 ### Important Notes
 

@@ -12,6 +12,10 @@ from .models import (
 from .dependencies import NodeREDDependencies
 from .base_tool import BaseTool
 import logfire
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Configure logfire
 logfire.configure()
