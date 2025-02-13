@@ -86,13 +86,10 @@ async def chat(message: ChatRequest) -> Dict[str, Any]:
             detail=str(e)
         )
 
+# Create and mount Gradio interface
+demo = create_gradio_interface()
+app = gr.mount_gradio_app(app, demo, path="/")
 
 if __name__ == "__main__":
     import uvicorn
-    
-    # Create Gradio interface
-    demo = create_gradio_interface()
-    app = gr.mount_gradio_app(app, demo, path="/")
-    
-    # Run the app
     uvicorn.run(app, host="0.0.0.0", port=8000)

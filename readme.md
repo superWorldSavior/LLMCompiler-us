@@ -102,6 +102,13 @@ The Node-RED integration is organized into reusable components:
    cd node_red && npm install  # Install Node-RED dependencies
    ```
 
+3. **Deploy Node-RED flows**
+   ```bash
+   cd node_red
+   poetry run python deploy.py  # Deploy the flows to Node-RED
+   cd ..
+   ```
+
 ### Starting the Application
 
 1. **Start everything with one command**
