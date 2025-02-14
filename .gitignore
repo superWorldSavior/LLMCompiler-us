@@ -32,6 +32,10 @@ wheels/
 *.swp
 *.swo
 
+# Logs
+app.log
+app.log.*
+
 # OS
 .DS_Store
 Thumbs.db

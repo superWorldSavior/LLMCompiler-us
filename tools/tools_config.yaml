@@ -1,0 +1,81 @@
+# Configuration des tools disponibles
+# Utiliser # pour désactiver un tool
+# Utiliser !required pour marquer une information requise de l'utilisateur
+# Utiliser !depends pour spécifier les dépendances
+
+tools:
+  temperature_single:
+    enabled: true
+    name: "temperature_unique"
+    description: "Obtenir température pour une date spécifique"
+    category: "data"
+    implementation:
+      file: "temperature_tools.py"
+      class: "SingleTemperatureTool"
+    requires:
+      - name: "date"
+        description: "Date de la mesure"
+        format: "YYYY-MM-DD"
+        required: true
+    depends:
+      - tool: "node_red_status"
+
+  temperature_list:
+    enabled: true
+    name: "liste_temperatures"
+    description: "Lister températures avec filtres"
+    category: "data"
+    implementation:
+      file: "temperature_tools.py"
+      class: "ListTemperatureTool"
+    requires:
+      - name: "period"
+        description: "Période (ex: février 2024)"
+        required: false
+    depends:
+      - tool: "node_red_status"
+
+  node_red_status:
+    enabled: true
+    name: "node_red_status"
+    description: "Vérifier si Node-RED est disponible"
+    category: "system"
+    implementation:
+      file: "node_red_tools.py"
+      class: "NodeRedStatusTool"
+    requires: []
+    depends: []
+
+  # Tool désactivé pour le moment
+  #jokes:
+  #  enabled: false
+  #  name: "blagues"
+  #  description: "Générer des blagues Chuck Norris"
+  #  category: "entertainment"
+  #  implementation:
+  #    file: "jokes.py"
+  #    class: "JokesTool"
+  #  requires: []  # Pas d'information requise
+  #  depends:
+  #    - name: "chucknorris-api"
+  #      endpoint: "https://api.chucknorris.io"
+  #      timeout: 3
+
+# Template pour un nouveau tool
+#  nouveau_tool:
+#    enabled: true
+#    name: "nom_technique"
+#    description: "Description pour l'agent"
+#    category: "catégorie"
+#    implementation:
+#      file: "fichier.py"
+#      class: "NomClasse"
+#    requires:
+#      - name: "param1"
+#        description: "Description du paramètre"
+#        format: "Format attendu"
+#        required: true/false
+#    depends:
+#      - name: "nom-service"
+#        endpoint: "url"
+#        timeout: secondes

@@ -71,21 +71,63 @@ The Node-RED integration is organized into reusable components:
    - Node-RED API interaction
    - Backup functionality
 
-## Getting Started
+### R2R Configuration
+
+This project uses SciPhi Cloud for RAG capabilities. To configure R2R:
+
+1. Create an account on [SciPhi Cloud](https://app.sciphi.ai)
+2. Get your API key from the dashboard
+3. Add it to your `.env` file:
+```bash
+SCIPHI_API_KEY=your_api_key_here
+```
+
+The project will automatically use SciPhi Cloud's managed R2R service instead of running it locally.
+
+### LangSmith Configuration
+
+This project uses LangSmith for monitoring and debugging LangChain applications. Required environment variables:
+
+```bash
+LANGSMITH_TRACING=true
+LANGSMITH_ENDPOINT="https://api.smith.langchain.com"
+LANGSMITH_API_KEY="<your-api-key>"
+LANGSMITH_PROJECT="<your-projeect-name>"
+OPENAI_API_KEY="<your-openai-api-key>"
+```
+
+### Getting Started
 
 ### Prerequisites
 
-1. **Install pyenv**
-   - Windows: Follow instructions at https://github.com/pyenv-win/pyenv-win#installation
-   - The project will automatically use Python 3.10 through pyenv
+- Python 3.11.9 (recommended version for best compatibility with LangChain and LangGraph)
+- [pyenv-win](https://github.com/pyenv-win/pyenv-win) for Python version management
+- [Poetry](https://python-poetry.org/) for dependency management
+- Node-RED installed and running
 
-2. **Install Poetry**
-   - Follow instructions at https://python-poetry.org/docs/#installation
-   
-3. **Install Node.js and npm**
-   - Download and install from https://nodejs.org/
-   - Install Node-RED globally: `npm install -g node-red`
-   - Install SQLite node: `cd ~/.node-red && npm install node-red-node-sqlite`
+### Python Setup
+
+1. Install pyenv-win:
+```powershell
+# Run the installation script
+.\install-pyenv-win.ps1
+```
+
+2. Install Python 3.11.9:
+```bash
+pyenv install 3.11.9
+```
+
+3. Set Python version for the project:
+```bash
+# This will use Python 3.11.9 for this project
+pyenv local 3.11.9
+```
+
+4. Install dependencies:
+```bash
+poetry install
+```
 
 ### Installation
 
@@ -97,7 +139,7 @@ The Node-RED integration is organized into reusable components:
 
 2. **Install dependencies**
    ```bash
-   # pyenv will automatically install and use Python 3.10
+   # pyenv will automatically install and use Python 3.11.9
    poetry install  # Install Python dependencies
    cd node_red && npm install  # Install Node-RED dependencies
    ```
@@ -119,6 +161,27 @@ The Node-RED integration is organized into reusable components:
    - Start Node-RED (available at http://127.0.0.1:1880)
    - Wait for Node-RED to initialize
    - Start the FastAPI server with chat interface (available at http://127.0.0.1:8000)
+
+### Running FastAPI without Node-RED
+
+To start only the FastAPI backend with Gradio interface (without Node-RED integration):
+
+1. Make sure you have Poetry installed:
+```bash
+pip install poetry
+```
+
+2. Install dependencies:
+```bash
+poetry install
+```
+
+3. Start the FastAPI server:
+```bash
+poetry run start
+```
+
+This will start the FastAPI server with hot-reload enabled. The Gradio interface will be available at `http://localhost:8000`.
 
 ### Important Notes
 

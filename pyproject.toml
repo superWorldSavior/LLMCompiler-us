@@ -4,27 +4,37 @@ version = "0.1.0"
 description = "FastAPI application with Node-RED integration for temperature monitoring"
 authors = ["Your Name <your.email@example.com>"]
 packages = [
-    { include = "core" },
-    { include = "tools" }
+    { include = "core", format = "wheel" },
+    { include = "tools", format = "wheel" }
 ]
 
 [tool.poetry.dependencies]
-python = "3.10.*"
+python = "3.11.*"
 fastapi = "*"
 uvicorn = "*"
 python-dotenv = "*"
 requests = "*"
 pydantic = "*"
-pydantic-ai = "*"
 gradio = "*"
 python-multipart = "*"
 openai = "*"
 logfire = "*"
 aiohttp = "*"
+langchain = "*"
+langchain-core = "*"
+langchain-community = "*"
+langgraph = "*"
+langsmith = "*"
+r2r = "*"
+langchain-openai = "*"
+loguru = "^0.7.3"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
 
+[tool.poetry.scripts]
+start = "main:main"
+
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
