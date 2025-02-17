@@ -5,7 +5,8 @@ description = "FastAPI application with Node-RED integration for temperature mon
 authors = ["Your Name <your.email@example.com>"]
 packages = [
     { include = "core", format = "wheel" },
-    { include = "tools", format = "wheel" }
+    { include = "tools", format = "wheel" },
+    { include = "llmcompiler", format = "wheel" }
 ]
 
 [tool.poetry.dependencies]
@@ -28,6 +29,9 @@ langsmith = "*"
 r2r = "*"
 langchain-openai = "*"
 loguru = "^0.7.3"
+bs4 = "*"
+numexpr = "*"
+tiktoken = "*"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "*"
