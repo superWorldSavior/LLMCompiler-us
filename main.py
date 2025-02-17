@@ -3,19 +3,15 @@ import os
 import sys
 from typing import Dict, Any, AsyncGenerator, TypedDict, List, Optional
 
-# Add src to PYTHONPATH
-sys.path.append(os.path.join(os.path.dirname(__file__), "llmcompiler", "src"))
-
 import gradio as gr
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from langchain_openai import ChatOpenAI
 from loguru import logger
-from contextlib import asynccontextmanager
-from langchain_community.chat_models import ChatOpenAI
-from langchain_core.tools import Tool
 
-# Import from llmcompiler package
 from llmcompiler.src.llm_compiler.llm_compiler import LLMCompiler
+from llmcompiler.src.tools.base import Tool
 from llmcompiler.src.utils.logger_utils import enable_logging
 
 # Configure logging
@@ -144,6 +140,13 @@ def create_app() -> FastAPI:
         logger.info("Shutting down application...")
     
     app = FastAPI(lifespan=lifespan)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
     return app
 
 # Create FastAPI app
