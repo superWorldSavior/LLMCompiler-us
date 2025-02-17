@@ -264,3 +264,7 @@ python node_red/deploy.py
    ```bash
    uvicorn main:app --reload
    ```
+
+# LLMCompiler
+
+This is a fork of [SqueezeAILab/LLMCompiler](https://github.com/SqueezeAILab/LLMCompiler) with improved imports and package structure.
