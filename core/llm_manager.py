@@ -54,7 +54,7 @@ Retourne TOUJOURS au moins une ligne."""),
         
         # Get plan from LLM
         response = await self.llm.ainvoke(messages)
-        logger.debug("LLM response", response=response, content=response.content)
+        logger.debug("LLM response", content=response.content)
         
         # Parse steps
         steps = [s.strip() for s in response.content.split('\n') if s.strip()]
@@ -65,7 +65,7 @@ Retourne TOUJOURS au moins une ligne."""),
             steps = ["Répondre directement: " + response.content]
             
         result = {"steps": steps}
-        logger.debug("Final plan", plan=result, step_count=len(steps))
+        logger.debug("Final plan", plan=result, step_count=len(steps), steps=steps)
         return result
 
     def _get_tool_params(self, tool_name: str) -> str:
