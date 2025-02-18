@@ -3,14 +3,14 @@ from typing import Dict, Any, Optional
 import aiohttp
 import json
 from loguru import logger
-from .base_tool import BaseTool, ToolConfig
+from .base_tool import Tool, ToolConfig
 
 
 # Configure loguru
 logger.remove(0)
 
 
-class ChuckNorrisJokeTool(BaseTool):
+class ChuckNorrisJokeTool(Tool):
     """Tool pour générer des blagues Chuck Norris."""
     
     def __init__(self, config: ToolConfig):

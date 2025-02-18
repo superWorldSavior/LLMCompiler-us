@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+  File "C:\Users\erpes\.virtualenvs\red-node-pimp-PI_vPjLh-py3.11\Lib\site-packages\r2r\__init__.py", line 13, in <module>
+    pyproject_data = toml.load(pyproject_path)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\erpes\.virtualenvs\red-node-pimp-PI_vPjLh-py3.11\Lib\site-packages\toml\decoder.py", line 133, in load
+    with io.open(_getpath(f), encoding='utf-8') as ffile:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+FileNotFoundError: [Errno 2] No such file or directory: 'C:\\Users\\erpes\\.virtualenvs\\red-node-pimp-PI_vPjLh-py3.11\\Lib\\site-packages\\pyproject.toml'

@@ -77,7 +77,7 @@ class TemperatureTool:
         """Check if Node-RED and temperature endpoints are available."""
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(f"{self.endpoint}/temperature/latest") as resp:
+                async with session.get(f"{self.endpoint}/list/temperatures") as resp:
                     return resp.status == 200
         except Exception:
             return False
@@ -101,16 +101,12 @@ class TemperatureTool:
         """
         try:
             async with aiohttp.ClientSession() as session:
-                if parameters and "date" in parameters:
-                    # Get temperature for specific date
-                    url = f"{self.endpoint}/temperature/{parameters['date']}"
-                elif parameters and all(k in parameters for k in ["start_date", "end_date"]):
-                    # Get temperature range
-                    url = f"{self.endpoint}/temperature/range"
-                    url += f"?start={parameters['start_date']}&end={parameters['end_date']}"
+                if parameters and parameters.get("date"):
+                    url = f"{self.endpoint}/query/temperature?date={parameters['date']}"
+                elif parameters and parameters.get("start_date") and parameters.get("end_date"):
+                    url = f"{self.endpoint}/query/temperature?start_date={parameters['start_date']}&end_date={parameters['end_date']}"
                 else:
-                    # Get latest temperature
-                    url = f"{self.endpoint}/temperature/latest"
+                    url = f"{self.endpoint}/list/temperatures"
                 
                 async with session.get(url) as resp:
                     if resp.status != 200:
