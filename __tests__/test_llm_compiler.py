@@ -2,6 +2,11 @@
 import asyncio
 import os
 from typing import Dict, Any
+import pytest
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 from langchain_openai import ChatOpenAI
 
@@ -9,6 +14,7 @@ from llmcompiler.configs.ittpc.configs import CONFIGS as ITTPC_CONFIGS
 from llmcompiler.src.llm_compiler.llm_compiler import LLMCompiler
 
 
+@pytest.mark.asyncio
 async def test_llm_compiler_basic_query():
     """Test that LLMCompiler can handle a basic query."""
     # Initialize OpenAI client

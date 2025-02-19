@@ -20,11 +20,7 @@ class ChuckNorrisJokeTool(Tool):
             config: Configuration du tool
         """
         super().__init__(config)
-        # Chuck Norris API is optional, use default if not configured
-        self.endpoint = self.get_service_endpoint(
-            "chucknorris-api",
-            default_endpoint="https://api.chucknorris.io"
-        )
+        self.endpoint = "https://api.chucknorris.io"
     
     async def validate_dependencies(self) -> bool:
         """Vérifie que l'API Chuck Norris est disponible.

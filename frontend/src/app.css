@@ -1,1 +1,55 @@
-@import 'tailwindcss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-base-100 text-base-content font-mono min-h-screen;
+  }
+}
+
+@layer components {
+  .industrial-container {
+    @apply bg-base-200 border border-base-300 shadow-lg;
+  }
+  
+  .industrial-header {
+    @apply bg-base-300 border-b border-base-300 p-4;
+  }
+  
+  .industrial-title {
+    @apply text-xl font-bold text-primary tracking-wider;
+  }
+  
+  .industrial-status {
+    @apply bg-base-300 text-base-content text-xs px-2 py-1 border border-base-300 rounded;
+  }
+  
+  .industrial-input {
+    @apply input input-bordered bg-base-200 border-2 focus:border-primary;
+  }
+  
+  .industrial-button {
+    @apply btn btn-primary;
+  }
+  
+  .industrial-message {
+    @apply p-4 border-2 border-base-300 relative rounded-lg shadow-md transition-all duration-200;
+  }
+  
+  .industrial-message-user {
+    @apply ml-20 border-l-4 border-l-primary bg-gradient-to-r from-base-200 to-base-300;
+  }
+  
+  .industrial-message-assistant {
+    @apply mr-20 border-r-4 border-r-secondary bg-gradient-to-l from-base-200 to-base-300;
+  }
+  
+  .industrial-message-thought {
+    @apply border-warning bg-warning bg-opacity-5;
+  }
+  
+  .industrial-message-error {
+    @apply border-error bg-error bg-opacity-5;
+  }
+}

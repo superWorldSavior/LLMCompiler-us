@@ -3,4 +3,6 @@
 	let { children } = $props();
 </script>
 
-{@render children()}
+<div data-theme="professional">
+  {@render children()}
+</div>

@@ -1,2 +1,19 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<script lang="ts">
+  import ChatContainer from '$lib/components/Chat/ChatContainer.svelte';
+</script>
+
+<div class="page">
+  <main>
+    <ChatContainer />
+  </main>
+</div>
+
+<style>
+  .page {
+    @apply min-h-screen bg-base-100;
+  }
+
+  main {
+    @apply flex-1;
+  }
+</style>
