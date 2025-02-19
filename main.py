@@ -7,14 +7,25 @@ from typing import Dict, Any, Optional
 
 from fastapi import FastAPI, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
+import asyncio
+import logging
+from typing import Optional
+import json
+import time
+import traceback
+
 from loguru import logger
 from pydantic import BaseModel
-from langchain_openai import ChatOpenAI
 
-from llmcompiler.configs.ittpc.configs import CONFIGS as ITTPC_CONFIGS
 from llmcompiler.src.llm_compiler.llm_compiler import LLMCompiler
 from llmcompiler.src.llm_compiler.constants import END_OF_PLAN
+from llmcompiler.src.callbacks.callbacks import AsyncStatsCallbackHandler
+from llmcompiler.configs.ittpc.configs import CONFIGS as ITTPC_CONFIGS
+from llmcompiler.src.utils.model_utils import get_model
+from llmcompiler.src.utils.logger_utils import log, enable_logging
 
+# Enable logging
+enable_logging(True)
 
 # Configure loguru
 logger.remove()  # Remove default handler
@@ -38,39 +49,52 @@ async def lifespan(app: FastAPI):
     Handles startup and shutdown events.
     """
     # Startup
-    logger.info("🚀 Starting application...")
+    log("🚀 Starting application...")
     
-    # Initialize OpenAI client
-    logger.info("🔧 Initializing OpenAI client...")
-    llm = ChatOpenAI(
-        model_name=ITTPC_CONFIGS["default_model"],
-        temperature=0,
-        streaming=True,
+    # Initialize LLMs using their utils
+    log("🔧 Initializing LLMs...")
+    
+    # Agent LLM - no streaming
+    agent_llm = get_model(
+        model_type="openai",
+        model_name="gpt-4",
+        vllm_port=None,
+        stream=False,
+        temperature=0
     )
     
-    # Initialize LLM Compiler with configuration from ITTPC_CONFIGS
-    logger.info("🔧 Initializing LLM Compiler...")
+    # Planner LLM - with streaming
+    planner_llm = get_model(
+        model_type="openai",
+        model_name="gpt-4",
+        vllm_port=None,
+        stream=True,
+        temperature=0
+    )
+
+    # Initialize LLM Compiler
+    log("🔧 Initializing LLM Compiler...")
     chain = LLMCompiler(
         tools=ITTPC_CONFIGS["tools"](),
-        planner_llm=llm,
-        agent_llm=llm,
+        planner_llm=planner_llm,
         planner_example_prompt=ITTPC_CONFIGS["prompts"]["gpt"]["planner_prompt"],
         planner_example_prompt_replan=None,
-        planner_stop=None,
+        planner_stop=[END_OF_PLAN],
         planner_stream=True,
+        agent_llm=agent_llm,
         joinner_prompt=ITTPC_CONFIGS["prompts"]["gpt"]["output_prompt"],
         joinner_prompt_final=None,
-        max_replans=ITTPC_CONFIGS["max_replans"],
-        benchmark=False
+        max_replans=2,
+        benchmark=True,
     )
     
     app.state.chain = chain
-    logger.info("✅ Application components initialized")
+    log("✅ Application components initialized")
     
     yield
     
     # Shutdown
-    logger.info("👋 Shutting down application...")
+    log("👋 Shutting down application...")
 
 
 def create_app() -> FastAPI:
@@ -96,40 +120,89 @@ def create_app() -> FastAPI:
         
         Handles real-time chat communication with the client.
         """
-        logger.info("🔌 New WebSocket connection request")
+        log("🔌 New WebSocket connection request")
         await websocket.accept()
-        logger.info("✅ WebSocket connection accepted")
+        log("✅ WebSocket connection accepted")
         
         try:
             while True:
                 # Receive message from client
                 message = await websocket.receive_text()
-                logger.info(f"📩 Received message: {message}")
+                log("📩 Received message:", message)
                 
                 try:
                     # Process message with LLMCompiler
-                    logger.info("🤖 Processing with LLMCompiler...")
-                    response = await app.state.chain.arun({"input": message})
-                    logger.info(f"📝 Raw response: {response}")
+                    log("🤖 Processing with LLMCompiler (streaming mode)...")
                     
-                    final_msg = {
-                        "type": "response",
-                        "text": response,
-                        "icon": ""
-                    }
-                    await websocket.send_text(json.dumps(final_msg))
-                
+                    # Initialize callback handler with streaming
+                    stats_handler = AsyncStatsCallbackHandler(stream=True)
+                    
+                    start_time = time.time()
+                    try:
+                        log("Question:", block=True)
+                        log(message, block=True)
+                        
+                        response = await app.state.chain.arun(
+                            message,
+                            callbacks=[stats_handler]
+                        )
+                        
+                        # Calculate processing time
+                        processing_time = f"{time.time() - start_time:.2f}"
+                        
+                        # Log stats
+                        log("Raw Answer:", block=True)
+                        log(response, block=True)
+                        log("Break out of replan loop.")
+                        log("> Finished chain.")
+                        
+                        stats = stats_handler.get_stats()
+                        log(f"📊 Stats: {stats}")
+                        log(f"⏱️ Processing time: {processing_time} seconds")
+                        
+                        # Use response - extract answer from tuple (thought, answer, is_replan)
+                        if isinstance(response, tuple) and len(response) == 3:
+                            _, response_text, _ = response
+                        else:
+                            response_text = str(response)
+                        
+                        response_text = response_text.strip()
+                        
+                        # Send final response
+                        await websocket.send_json({
+                            "type": "response",
+                            "text": response_text,
+                            "icon": "",
+                            "time": processing_time,
+                            "error": False
+                        })
+                        
+                    except Exception as e:
+                        log(f"❌ Error in chain: {str(e)}")
+                        log(traceback.format_exc())
+                        await websocket.send_json({
+                            "type": "response",
+                            "text": f"Une erreur s'est produite : {str(e)}",
+                            "icon": "❌",
+                            "time": "0",
+                            "error": True
+                        })
+                    
                 except Exception as e:
-                    logger.error(f"❌ Processing error: {str(e)}")
-                    error_msg = {
-                        "type": "error",
-                        "text": f"Une erreur est survenue : {str(e)}",
-                        "icon": "⚠️"
-                    }
-                    await websocket.send_text(json.dumps(error_msg))
+                    log(f"❌ Processing error: {str(e)}")
+                    await websocket.send_json({
+                        "type": "response",
+                        "text": f"Une erreur s'est produite : {str(e)}",
+                        "icon": "❌",
+                        "time": "0",
+                        "error": True
+                    })
                 
         except Exception as e:
-            logger.error(f"❌ WebSocket error: {str(e)}")
+            log(f"❌ WebSocket error: {str(e)}")
+            log(traceback.format_exc())
+            
+        finally:
             await websocket.close()
     
     return app
@@ -138,7 +211,7 @@ def create_app() -> FastAPI:
 def main():
     """Run the FastAPI application."""
     import uvicorn
-    logger.info("🌟 Starting server...")
+    log("🌟 Starting server...")
     # Create FastAPI app
     app = create_app()
     uvicorn.run(app, host="0.0.0.0", port=8000)
@@ -146,6 +219,6 @@ def main():
 
 if __name__ == "__main__":
     if not os.getenv("OPENAI_API_KEY"):
-        logger.error("❌ OPENAI_API_KEY environment variable is not set")
+        log("❌ OPENAI_API_KEY environment variable is not set")
         sys.exit(1)
     main()
